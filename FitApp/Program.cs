@@ -9,6 +9,7 @@ using FitApp.Helpers;
 using FitApp.Models;
 using FitApp.Options;
 using System.Text.Json;
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseUrls("http://0.0.0.0:5270");
@@ -79,7 +80,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
-        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))
+        new MySqlServerVersion(new Version(8, 0, 21)) // Use fixed version instead of AutoDetect to avoid connection on startup
     ));
 
 // Add JWT Authentication
@@ -122,10 +123,14 @@ builder.Services.AddScoped<IStreakService, StreakService>();
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
-using (var scope = app.Services.CreateScope())
+
+// Database migration and seeding - wrapped in try-catch to prevent startup failure
+try
 {
-    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.Migrate(); // garanti
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        db.Database.Migrate(); // garanti
 
     if (!await db.FoodItems.AnyAsync())
     {
@@ -726,7 +731,15 @@ using (var scope = app.Services.CreateScope())
         db.ArticleKeyTakeaways.AddRange(deadliftKeyTakeaways);
         await db.SaveChangesAsync();
     }
+    }
 }
+catch (Exception ex)
+{
+    // Log error but don't fail startup - allows app to start even if DB is temporarily unavailable
+    Console.WriteLine($"⚠️ Database initialization error: {ex.Message}");
+    Console.WriteLine($"⚠️ Application will continue, but database features may not work until connection is restored.");
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
