@@ -1,0 +1,254 @@
+@FitApp_HostAddress = http://localhost:5270
+
+GET {{FitApp_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+
+### Email Verification API Tests
+
+# Variables
+@baseUrl = http://localhost:5270
+@authToken = {{login.response.body.token}}
+
+### Start Registration
+# @name register_start
+POST {{baseUrl}}/api/auth/register/start
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+### Verify Registration
+POST {{baseUrl}}/api/auth/register/verify
+Content-Type: application/json
+
+{
+  "verificationId": "{{register_start.response.body.verificationId}}",
+  "code": "123456"
+}
+
+### Resend Verification
+POST {{baseUrl}}/api/auth/register/resend
+Content-Type: application/json
+
+{
+  "verificationId": "{{register_start.response.body.verificationId}}"
+}
+
+### Login to get token
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+### FitApp API Tests
+
+### User Registration
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "Test123!",
+  "name": "Test User"
+}
+
+### User Login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "Test123!"
+}
+
+### Password Reset - Start
+POST {{baseUrl}}/api/auth/password/forgot/start
+Content-Type: application/json
+
+{
+  "email": "test@example.com"
+}
+
+### Password Reset - Verify Code
+POST {{baseUrl}}/api/auth/password/forgot/verify
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "code": "123456"
+}
+
+### Password Reset - Reset Password
+POST {{baseUrl}}/api/auth/password/forgot/reset
+Content-Type: application/json
+
+{
+  "resetToken": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9...",
+  "newPassword": "NewTest123!"
+}
+
+### Get User Profile
+GET {{baseUrl}}/api/user/profile
+Authorization: Bearer {{authToken}}
+
+### Update User Profile
+PUT {{baseUrl}}/api/user/profile
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Updated Name",
+  "age": 25,
+  "weight": 70.5,
+  "height": 175.0,
+  "gender": "Male",
+  "activityLevel": "Moderate",
+  "goal": "Lose Weight"
+}
+
+### Get User Daily Stats
+GET {{baseUrl}}/api/user/daily-stats
+Authorization: Bearer {{authToken}}
+
+### Add User Daily Stats
+POST {{baseUrl}}/api/user/daily-stats
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "date": "2024-01-15",
+  "caloriesConsumed": 1800,
+  "caloriesBurned": 300,
+  "steps": 8000,
+  "waterIntake": 2.5,
+  "sleepHours": 7.5,
+  "mood": "Good"
+}
+
+### Get Food Items
+GET {{baseUrl}}/api/foods
+
+### Get Food Items by Category
+GET {{baseUrl}}/api/foods/category/Et
+
+### Get Food Items by Search
+GET {{baseUrl}}/api/foods/search?query=tavuk
+
+### Add User Meal
+POST {{baseUrl}}/api/user-meals
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Kahvaltı",
+  "foodItems": [
+    {
+      "foodItemId": 1,
+      "portionGrams": 100
+    },
+    {
+      "foodItemId": 3,
+      "portionGrams": 50
+    }
+  ],
+  "mealTime": "Breakfast",
+  "date": "2024-01-15"
+}
+
+### Get User Meals
+GET {{baseUrl}}/api/user-meals
+Authorization: Bearer {{authToken}}
+
+### Get Articles
+GET {{baseUrl}}/api/articles
+
+### Get Article by ID
+GET {{baseUrl}}/api/articles/1
+
+### Get Workout Programs
+GET {{baseUrl}}/api/workout-programs
+
+### Get Workout Program by ID
+GET {{baseUrl}}/api/workout-programs/1
+
+### Get Exercises
+GET {{baseUrl}}/api/exercises
+
+### Get Exercise by ID
+GET {{baseUrl}}/api/exercises/1
+
+### Get Todos
+GET {{baseUrl}}/api/todos
+Authorization: Bearer {{authToken}}
+
+### Add Todo
+POST {{baseUrl}}/api/todos
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "title": "Workout",
+  "description": "Do 30 minutes cardio",
+  "dueDate": "2024-01-16",
+  "priority": "High",
+  "category": "Fitness"
+}
+
+### Update Todo
+PUT {{baseUrl}}/api/todos/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "title": "Updated Workout",
+  "description": "Do 45 minutes cardio",
+  "dueDate": "2024-01-16",
+  "priority": "High",
+  "category": "Fitness",
+  "isCompleted": true
+}
+
+### Delete Todo
+DELETE {{baseUrl}}/api/todos/1
+Authorization: Bearer {{authToken}}
+
+### Test unauthorized access
+GET {{baseUrl}}/api/todos
+# No Authorization header
+
+### Test invalid token
+GET {{baseUrl}}/api/todos
+Authorization: Bearer invalid_token
+
+### Test validation - missing title
+POST {{baseUrl}}/api/todos
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "description": "Test description",
+  "category": "Workout",
+  "type": "Daily",
+  "dueDate": "2025-01-15T08:00:00Z"
+}
+
+### Test validation - invalid category
+POST {{baseUrl}}/api/todos
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "title": "Test todo",
+  "description": "Test description",
+  "category": "InvalidCategory",
+  "type": "Daily",
+  "dueDate": "2025-01-15T08:00:00Z"
+}

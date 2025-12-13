@@ -1,0 +1,63 @@
+## .NET Core
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.dll
+*.exe
+*.pdb
+*.deps.json
+*.runtimeconfig.json
+
+## Publish
+publish/
+*.zip
+
+## Visual Studio / Rider
+.vs/
+.idea/
+*.sln.docstates
+*.userosscache
+*.sln.docstates
+
+## Sensitive files - NEVER COMMIT THESE
+appsettings.json
+appsettings.*.json
+!appsettings.example.json
+*.pfx
+*.key
+*.pem
+
+## Logs
+*.log
+logs/
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Temporary files
+*.tmp
+*.temp
+*.swp
+*~
+
+## Build results
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+
+## NuGet
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+
+## Rider
+.idea/
+*.iml
+
+## VS Code
+.vscode/
+
