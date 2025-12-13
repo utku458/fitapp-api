@@ -12,7 +12,7 @@ using System.Text.Json;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.WebHost.UseUrls("http://0.0.0.0:5270");
+builder.WebHost.UseUrls("http://0.0.0.0:5000"); // AWS Elastic Beanstalk standard port
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
