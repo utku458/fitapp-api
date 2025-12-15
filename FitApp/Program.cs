@@ -23,9 +23,36 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        if (builder.Environment.IsDevelopment())
+        {
+            // Development: Allow localhost origins with credentials
+            policy.WithOrigins(
+                    "http://localhost:3000",  // Next.js development
+                    "http://localhost:3001",  // Alternative port (if needed)
+                    "http://127.0.0.1:3000",  // Alternative localhost format
+                    "http://127.0.0.1:3001"   // Alternative localhost format
+                  )
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials(); // Allow cookies/credentials for JWT tokens
+        }
+        else
+        {
+            // Production: Allow specific production origins
+            policy.SetIsOriginAllowed(origin =>
+            {
+                // Allow localhost for testing (if needed in production)
+                if (origin.Contains("localhost") || origin.Contains("127.0.0.1"))
+                    return true;
+                
+                // Add your production domain here
+                // Example: return origin.StartsWith("https://yourdomain.com");
+                return true; // For now, allow all origins in production (update with your domain)
+            })
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+        }
     });
 });
 
